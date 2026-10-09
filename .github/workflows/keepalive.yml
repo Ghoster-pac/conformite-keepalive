@@ -1,0 +1,21 @@
+name: Keep-alive Render
+
+# Réveille / garde éveillée l'application Render gratuite
+# (elle s'endort après ~15 min sans visite).
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # toutes les 5 minutes
+  workflow_dispatch:         # lancement manuel possible
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping de l'application
+        run: |
+          URL="https://conformite-pfgh.onrender.com/api/public/info-reseau"
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$URL")
+          echo "Réponse HTTP : $code"
+          if [ "$code" = "000" ]; then
+            echo "::warning::L'application n'a pas répondu (elle se réveille peut-être)."
+          fi
